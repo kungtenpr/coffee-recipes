@@ -7,13 +7,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
 ));
 
-// localStorage can throw (private mode, blocked storage) — the page must work without it
-const store = {
-  get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
-  set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } },
-};
-
-const STATUS = { baseline: 'จุดตั้งต้น · ยังไม่ได้จูน', dialled: 'จูนแล้ว', archived: 'สูตรเก่า' };
+const STATUS = { baseline: 'จุดตั้งต้น · ยังไม่ได้จูน', dialled: 'จูนแล้ว' };
 const SWIRL = { allowed: 'swirl ท้ายได้ (เบาๆ)', forbidden: 'ห้าม swirl ท้าย' };
 const SORT = { mandatory: 'ต้องคัดเมล็ด', recommended: 'ควรคัดเมล็ด' };
 const DIRECTION = { push: 'ถั่วตัวนี้รสผิด → ดันการสกัดเพิ่ม', pull: 'ถั่วตัวนี้รสผิด → ถอยการสกัดลง' };
@@ -23,15 +17,11 @@ const water = (id) => byId(DATA.waters, id);
 const bean = (id) => byId(DATA.beans, id);
 const recipesOf = (beanId) => DATA.recipes.filter((r) => r.bean === beanId);
 
-function selectedWaterId() {
-  const saved = store.get('water');
-  return saved && water(saved) ? saved : DATA.current_water;
-}
-
-// recipes are listed oldest → newest, so the last match is the latest version
-function recipeFor(beanId, waterId) {
-  const list = recipesOf(beanId).filter((r) => r.water === waterId);
-  return list[list.length - 1] || null;
+// recipes are listed oldest → newest, so the last match per water is its latest version
+function latestPerWater(beanId) {
+  const byWater = new Map();
+  for (const r of recipesOf(beanId)) byWater.set(r.water, r);
+  return [...byWater.values()];
 }
 
 const beanStyle = (b) => `style="--bean:${esc(b.color)}"`;
@@ -53,53 +43,45 @@ function waterMeta(w) {
 
 /* ---------- Home ---------- */
 
-function card(b, waterId) {
-  const r = recipeFor(b.id, waterId);
-  const summary = r
-    ? `<div><b>${r.dose_g}</b><span>g ถั่ว</span></div>
-       <div><b>${ratioText(r)}</b><span>อัตราส่วน</span></div>
-       <div><b>${r.temp_c}°</b><span>อุณหภูมิ</span></div>
-       <div><b>${r.grind.clicks}</b><span>คลิก</span></div>`
-    : '<p class="empty">ยังไม่ได้จูนกับน้ำนี้</p>';
+function waterName(id) {
+  const w = water(id);
+  if (!w) return id;
+  return w.ec_us_cm ? `${w.name} · ${w.ec_us_cm}` : w.name;
+}
+
+function card(b) {
+  const recipes = latestPerWater(b.id);
+  const rows = recipes.length
+    ? recipes.map((r) => `
+        <a class="water-row" href="${beanHref(b, r)}">
+          <span class="wr-name">${esc(waterName(r.water))}</span>
+          <span class="wr-spec">${r.dose_g} g · ${ratioText(r)} · ${r.temp_c}° · ${r.grind.clicks} คลิก</span>
+        </a>`).join('')
+    : '<p class="empty">ยังไม่มีสูตร</p>';
 
   return `
-    <a class="card beaned" href="${beanHref(b, r)}" ${beanStyle(b)}>
-      <div class="card-media">${media(b)}</div>
+    <article class="card beaned" ${beanStyle(b)}>
+      <a class="card-media" href="${beanHref(b, recipes[recipes.length - 1])}" tabindex="-1" aria-hidden="true">${media(b)}</a>
       <div class="card-body">
         <p class="eyebrow">${esc(b.roaster)} · ${esc(b.origin)}</p>
-        <h2 class="bean-name">${esc(b.name)}</h2>
+        <h2 class="bean-name"><a href="${beanHref(b, recipes[recipes.length - 1])}">${esc(b.name)}</a></h2>
         <p class="meta">${esc(b.process)} · ${esc(b.roast)}</p>
         <ul class="notes">${b.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
-        <div class="summary">${summary}</div>
+        <div class="water-rows">${rows}</div>
       </div>
-    </a>`;
+    </article>`;
 }
 
 function renderHome() {
-  const waterId = selectedWaterId();
-  const options = DATA.waters.map((w) => `
-    <option value="${esc(w.id)}"${w.id === waterId ? ' selected' : ''}>
-      ${esc(w.name)}${w.id === DATA.current_water ? ' (ใช้อยู่)' : ''}
-    </option>`).join('');
-
   document.title = 'สูตรกาแฟ';
   app.innerHTML = `
     <header class="top wrap">
       <p class="eyebrow">V60 · Timemore C3S · 4:6</p>
       <h1 class="title">สูตรกาแฟ</h1>
-      <div class="water-pick">
-        <label for="water">น้ำ</label>
-        <span class="select"><select id="water">${options}</select></span>
-      </div>
-      <p class="water-meta">${waterMeta(water(waterId))}</p>
+      <p class="water-meta">เลือกเมล็ด แล้วเลือกสูตรตามน้ำที่ใช้</p>
     </header>
-    <main class="wrap grid">${DATA.beans.map((b) => card(b, waterId)).join('')}</main>
+    <main class="wrap grid">${DATA.beans.map(card).join('')}</main>
     <footer class="wrap foot">อัปเดตล่าสุด ${esc(DATA.updated)}</footer>`;
-
-  app.querySelector('#water').addEventListener('change', (e) => {
-    store.set('water', e.target.value);
-    renderHome();
-  });
 }
 
 /* ---------- Bean / recipe ---------- */
@@ -130,14 +112,16 @@ function pourList(r) {
         <span class="n">${i + 1}</span>
         <div><div class="cum">${cum}<small> g</small></div><div class="add">เท +${p.g} g</div></div>
         <div class="at">${p.at ? `~${esc(p.at)}` : ''}</div>
+        ${p.note ? `<p class="do">${esc(p.note)}</p>` : ''}
       </li>`;
   }).join('');
 
-  const end = r.time
+  const end = r.time || r.finish_note
     ? `<li class="pour end">
         <span class="n">✓</span>
-        <div><div class="add">รอน้ำไหลหมด · เวลารวม</div></div>
-        <div class="at">${esc(r.time.min)}–${esc(r.time.max)}</div>
+        <div><div class="add">เวลารวม</div></div>
+        <div class="at">${r.time ? `${esc(r.time.min)}–${esc(r.time.max)}` : ''}</div>
+        ${r.finish_note ? `<p class="do">${esc(r.finish_note)}</p>` : ''}
       </li>`
     : '';
 
@@ -222,7 +206,7 @@ function factsPanel(b, w) {
 function recipeBody(b, r) {
   const w = water(r.water);
   const chips = [
-    `<span class="chip ${r.status === 'archived' ? 'old' : 'strong'}">${esc(STATUS[r.status] || r.status)}${r.version ? ` · ${esc(r.version)}` : ''}</span>`,
+    `<span class="chip strong">${esc(STATUS[r.status] || r.status)}${r.version ? ` · ${esc(r.version)}` : ''}</span>`,
     r.swirl && SWIRL[r.swirl] ? `<span class="chip${r.swirl === 'forbidden' ? ' strong' : ''}">${SWIRL[r.swirl]}</span>` : '',
     b.sort ? `<span class="chip${b.sort === 'mandatory' ? ' strong' : ''}">${SORT[b.sort]}</span>` : '',
     r.date ? `<span class="chip">${esc(r.date)}</span>` : '',
@@ -248,13 +232,10 @@ function recipeBody(b, r) {
 }
 
 function noRecipe(b) {
-  const w = water(selectedWaterId());
-  const others = recipesOf(b.id).length > 0;
   return `
     <div class="col">
       <section class="panel">
-        <h2>ยังไม่ได้จูนกับน้ำ ${esc(w ? w.name : '')}</h2>
-        <p class="meta">${others ? 'เลือกดูสูตรของน้ำอื่นจากแถบด้านบน' : 'ถั่วตัวนี้ยังไม่มีสูตร'}</p>
+        <h2>ถั่วตัวนี้ยังไม่มีสูตร</h2>
       </section>
     </div>
     <div class="col">${factsPanel(b, null)}</div>`;
@@ -265,11 +246,10 @@ function renderBean(beanId, recipeId) {
   if (!b) return renderHome();
 
   const list = recipesOf(b.id);
-  const r = (recipeId && list.find((x) => x.id === recipeId)) || recipeFor(b.id, selectedWaterId());
+  const r = (recipeId && list.find((x) => x.id === recipeId)) || list[list.length - 1] || null;
   const tabs = list.map((x) => {
-    const w = water(x.water);
     const current = r && x.id === r.id ? ' aria-current="page"' : '';
-    return `<a class="tab" href="${beanHref(b, x)}"${current}>${esc(w ? w.name : x.water)} · ${esc(x.version)}</a>`;
+    return `<a class="tab" href="${beanHref(b, x)}"${current}>${esc(waterName(x.water))} · ${esc(x.version)}</a>`;
   }).join('');
 
   document.title = `${b.name} · สูตรกาแฟ`;
