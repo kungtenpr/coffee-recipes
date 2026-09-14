@@ -1,0 +1,208 @@
+{
+  "updated": "2026-09-14",
+  "current_water": "neptune-144",
+  "waters": [
+    {
+      "id": "neptune-144",
+      "name": "Neptune",
+      "ec_us_cm": 144,
+      "temp_c": 29.7,
+      "note": "ไม่เติมแร่ · ต่ำกว่าเป้า 160–190"
+    },
+    {
+      "id": "pure-life",
+      "name": "Nestlé Pure Life",
+      "ec_us_cm": null,
+      "temp_c": null,
+      "note": "TDS ตามฉลาก ~178 ppm · น้ำที่ใช้จูนสูตรเดิม"
+    }
+  ],
+  "beans": [
+    {
+      "id": "yellow-lots",
+      "name": "Yellow Lots",
+      "full_name": "Honduras Yeast Beer Yellow Lots",
+      "roaster": "Fatman Coffee",
+      "origin": "Honduras",
+      "process": "Anaerobic Select Yeast",
+      "roast": "Light",
+      "notes": ["Beer", "Malt", "Honey Lemon", "Hops"],
+      "defect_pct": [2, 5],
+      "sort": "recommended",
+      "correction": "push",
+      "axis": "หวาน · มอลต์ · กลม",
+      "color": "#D9A21B",
+      "image": "images/yellow-lots.webp",
+      "label_note": null
+    },
+    {
+      "id": "benizio-beer-rose",
+      "name": "Benizio Beer Rose'",
+      "full_name": "Honduras Benizio Beer Rose'",
+      "roaster": "Fatman Coffee",
+      "origin": "Honduras · Benizio",
+      "process": "Washed Anaerobic",
+      "roast": "Light",
+      "notes": ["Rose", "Beer", "Raspberry", "Cherry", "Lychee"],
+      "defect_pct": [5, 12],
+      "sort": "mandatory",
+      "correction": "pull",
+      "axis": "ดอกไม้ · เบอร์รี · ใส",
+      "color": "#E0666B",
+      "image": "images/benizio-beer-rose.webp",
+      "label_note": "ภาพในร้านเขียน NATURAL แต่ฉลากถุงเขียน Washed Anaerobic → ยึดฉลาก ถ้าชิมแล้วหนา หวานเยิ้ม มีกลิ่นหมัก แปลว่าอาจเป็น Natural"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "yellow-lots-purelife-v1",
+      "bean": "yellow-lots",
+      "water": "pure-life",
+      "version": "v1",
+      "status": "archived",
+      "date": null,
+      "method": "4:6",
+      "dose_g": 20,
+      "water_g": 320,
+      "ratio": 16,
+      "temp_c": 94,
+      "grind": { "grinder": "Timemore C3S", "clicks": 17 },
+      "phase1_pours": 2,
+      "pours": [
+        { "g": 50, "at": "0:00" },
+        { "g": 78, "at": "0:45" },
+        { "g": 64, "at": "1:30" },
+        { "g": 64, "at": "2:10" },
+        { "g": 64, "at": "2:50" }
+      ],
+      "swirl": "allowed",
+      "time": { "min": "3:40", "max": "4:00" },
+      "why": [
+        "Phase 1 แบบ 50/78 ให้น้ำเทสองมากกว่า ดันความหวาน",
+        "Anaerobic + คั่วอ่อน เซลล์แน่น สารละลายอยู่ช่วงกลางถึงท้ายการสกัด โน้ตมอลต์กับน้ำผึ้งจะออกมาเมื่อสกัดได้สูง"
+      ],
+      "ladder": []
+    },
+    {
+      "id": "benizio-purelife-v1",
+      "bean": "benizio-beer-rose",
+      "water": "pure-life",
+      "version": "v1",
+      "status": "archived",
+      "date": null,
+      "method": "4:6",
+      "dose_g": 18,
+      "water_g": 300,
+      "ratio": 16.7,
+      "temp_c": 92,
+      "grind": { "grinder": "Timemore C3S", "clicks": 17 },
+      "phase1_pours": 2,
+      "pours": [
+        { "g": 60, "at": null },
+        { "g": 60, "at": null },
+        { "g": 60, "at": null },
+        { "g": 60, "at": null },
+        { "g": 60, "at": null }
+      ],
+      "swirl": "forbidden",
+      "time": null,
+      "why": [
+        "Washed ล้างเมือกออกก่อนตาก สารละลายน้อย ช่วงสกัดแคบ เกินนิดเดียวจะฝาดทันที",
+        "กลิ่นดอกไม้ระเหยง่ายที่สุด เกิน ~94 °C จะหายไประหว่างเท",
+        "Phase 1 เท่ากัน 60/60 รักษาความเปรี้ยว · ไม่ swirl ท้าย กันสกัดเกิน"
+      ],
+      "ladder": []
+    },
+    {
+      "id": "yellow-lots-neptune144-v2",
+      "bean": "yellow-lots",
+      "water": "neptune-144",
+      "version": "v2",
+      "status": "baseline",
+      "date": "2026-09-14",
+      "method": "4:6",
+      "dose_g": 20,
+      "water_g": 300,
+      "ratio": 15,
+      "temp_c": 96,
+      "grind": { "grinder": "Timemore C3S", "clicks": 17 },
+      "phase1_pours": 2,
+      "pours": [
+        { "g": 45, "at": "0:00" },
+        { "g": 75, "at": "0:45" },
+        { "g": 60, "at": "1:30" },
+        { "g": 60, "at": "2:10" },
+        { "g": 60, "at": "2:50" }
+      ],
+      "swirl": "allowed",
+      "time": { "min": "3:30", "max": "3:50" },
+      "why": [
+        "น้ำแร่น้อย ดึงรสได้อ่อน → ใช้ 1:15 ให้กาแฟเข้มขึ้น body จะรู้สึกหนาขึ้น",
+        "ดันการสกัดด้วยอุณหภูมิแทนการบดละเอียด เพราะ C3S บดละเอียดแล้วผงฝุ่นเยอะ ไหลช้า รสขุ่น",
+        "Phase 1 เทแรกน้อย เทสองมาก (45/75) เพื่อดันความหวานเหมือนสูตรเดิม"
+      ],
+      "ladder": [
+        {
+          "symptom": "เปรี้ยว กลวง ไม่หวาน",
+          "steps": ["บด 16 คลิก", "swirl เบาๆ หลังเทแรก", "บด 15 คลิก (ถ้าไหลหมดเกิน 4:30 ให้ร่อนผงฝุ่นออก)"]
+        },
+        {
+          "symptom": "ฝาด แห้ง ระคายคอ",
+          "steps": ["ลดเหลือ 94 °C"]
+        },
+        {
+          "symptom": "ไหลหมดเกิน 4:30",
+          "steps": ["บดหยาบขึ้น 1 คลิก", "ร่อนผงฝุ่นด้วยตะแกรง 200–250 micron"]
+        }
+      ]
+    },
+    {
+      "id": "benizio-neptune144-v2",
+      "bean": "benizio-beer-rose",
+      "water": "neptune-144",
+      "version": "v2",
+      "status": "baseline",
+      "date": "2026-09-14",
+      "method": "4:6",
+      "dose_g": 20,
+      "water_g": 320,
+      "ratio": 16,
+      "temp_c": 93,
+      "grind": { "grinder": "Timemore C3S", "clicks": 17 },
+      "phase1_pours": 2,
+      "pours": [
+        { "g": 64, "at": "0:00" },
+        { "g": 64, "at": "0:45" },
+        { "g": 64, "at": "1:30" },
+        { "g": 64, "at": "2:15" },
+        { "g": 64, "at": "3:00" }
+      ],
+      "swirl": "forbidden",
+      "time": { "min": "3:20", "max": "3:40" },
+      "why": [
+        "ถั่วเพิ่มจาก 18 เป็น 20 g ชั้นกาแฟหนาขึ้น น้ำไหลช้าลงเอง จึงคงเบอร์บด 17",
+        "ขยับอุณหภูมิแค่ +1 °C เพราะเกิน 94 °C กลิ่นกุหลาบจะระเหยหาย",
+        "น้ำแร่น้อยช่วยให้กลิ่นดอกไม้เด่นอยู่แล้ว ถั่วตัวนี้จึงไม่ต้องดันแรง",
+        "Phase 1 เท่ากัน 64/64 รักษาความเปรี้ยวสดใส · ห้าม swirl ท้าย กันสกัดเกินจนฝาด"
+      ],
+      "ladder": [
+        {
+          "symptom": "เปรี้ยวแหลมโดดๆ",
+          "steps": ["บด 16 คลิก", "เพิ่มเป็น 94 °C (เพดาน ห้ามเกิน)"]
+        },
+        {
+          "symptom": "ฝาด แห้ง",
+          "steps": ["บด 18 คลิก"]
+        },
+        {
+          "symptom": "กลิ่นดอกไม้หาย",
+          "steps": ["ลดเหลือ 91 °C"]
+        },
+        {
+          "symptom": "หนา หวานเยิ้ม มีกลิ่นหมัก",
+          "steps": ["อาจเป็น Natural → ใช้ค่าแบบ Yellow Lots (94 °C · 17 คลิก · 1:16)"]
+        }
+      ]
+    }
+  ]
+}
