@@ -10,7 +10,8 @@
 index.html          หน้าเดียว (hash routing: #/ · #/bean/<bean-id>/<recipe-id>)
 app.js              render ทั้งหมดจาก data
 styles.css
-data/recipes.json   ← แก้สูตร/เพิ่มเมล็ด/เพิ่มน้ำ ที่นี่ที่เดียว
+data/recipes.json   ← สูตรที่เคาะแล้ว (ขึ้นเว็บ) แก้ที่นี่ที่เดียว
+BREW-NOTES.md       ← สมุดบาริสต้า (เก็บในเครื่อง ไม่ขึ้น repo — อยู่ใน .git/info/exclude)
 images/             รูปถุง (ไม่มีรูปก็ได้ จะแสดงเป็นการ์ดสีประจำเมล็ด)
 ```
 
@@ -18,9 +19,10 @@ images/             รูปถุง (ไม่มีรูปก็ได้ 
 
 - `waters[]` — `id, name, ec_us_cm, temp_c, note`
 - `beans[]` — `id, name, full_name, roaster, origin, process, roast, notes[], defect_pct[min,max], sort (mandatory|recommended|null), correction (push|pull), axis, color (hex), image (path|null)`
-- `recipes[]` — สูตร = เมล็ด × น้ำ (คู่ละ 1 สูตร)
-  - `id, bean, water, method`
-  - `dose_g, water_g, ratio, temp_c, grind {grinder, clicks}`
+- `recipes[]` — สูตร = เมล็ด × น้ำ × เสิร์ฟ (ชุดละ 1 สูตร) · id = `bean--water--serve`
+  - `id, bean, water, serve (iced|hot), method`
+  - แบบเย็น: `ice_g` (น้ำแข็งในโถรอง นับรวมในอัตราส่วน), `prep_note`
+  - `dose_g, water_g` (น้ำร้อน), `temp_c, grind {grinder, clicks}` · อัตราส่วนคำนวณเอง = (water_g + ice_g) / dose_g
   - `phase1_pours` (4:6 = 2), `pours[{g, at, note}]` — g ต่อครั้ง ต้องรวมได้ `water_g` · note = ต้องทำอะไรตอนเท
   - `swirl (allowed|forbidden)`, `time {min, max}|null`, `finish_note`, `why[]`
 

@@ -7,23 +7,28 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
 ));
 
-const SWIRL = { allowed: 'swirl ท้ายเบาๆ', forbidden: 'ห้าม swirl ท้าย' };
+const SWIRL = { allowed: 'swirl ดริปเปอร์ท้ายเบาๆ', forbidden: 'ห้าม swirl ดริปเปอร์' };
 const SORT = { mandatory: 'ต้องคัดเมล็ด', recommended: 'ควรคัดเมล็ด' };
+const SERVE = { iced: 'เย็น', hot: 'ร้อน' };
+const SERVE_ORDER = ['iced', 'hot'];
 
 const byId = (list, id) => list.find((x) => x.id === id);
 const water = (id) => byId(DATA.waters, id);
 const bean = (id) => byId(DATA.beans, id);
 const recipesOf = (beanId) => DATA.recipes.filter((r) => r.bean === beanId);
 
-// one recipe per bean × water; if duplicated by mistake the later entry wins
-function latestPerWater(beanId) {
-  const byWater = new Map();
-  for (const r of recipesOf(beanId)) byWater.set(r.water, r);
-  return [...byWater.values()];
+// one recipe per bean × water × serve; waters follow data order, iced before hot
+function sortedRecipes(beanId) {
+  const wIndex = (id) => DATA.waters.findIndex((w) => w.id === id);
+  return recipesOf(beanId).sort((a, b) => (wIndex(a.water) - wIndex(b.water))
+    || (SERVE_ORDER.indexOf(a.serve) - SERVE_ORDER.indexOf(b.serve)));
 }
+const defaultRecipe = (beanId) => sortedRecipes(beanId)[0] || null;
 
 const beanStyle = (b) => `style="--bean:${esc(b.color)}"`;
-const ratioText = (r) => `1:${r.ratio}`;
+// iced recipes count the ice in the server as part of the water
+const totalWater = (r) => r.water_g + (r.ice_g || 0);
+const ratioText = (r) => `1:${Math.round((totalWater(r) / r.dose_g) * 10) / 10}`;
 const beanHref = (b, r) => `#/bean/${encodeURIComponent(b.id)}${r ? `/${encodeURIComponent(r.id)}` : ''}`;
 
 function waterName(id) {
@@ -42,11 +47,10 @@ function waterMeta(w) {
 /* ---------- Home: Phantom tiles ---------- */
 
 function tile(b) {
-  const recipes = latestPerWater(b.id);
   return `
     <article class="tile" ${beanStyle(b)}>
       <span class="image">${b.image ? `<img src="${esc(b.image)}" alt="" loading="lazy">` : ''}</span>
-      <a href="${beanHref(b, recipes[recipes.length - 1])}">
+      <a href="${beanHref(b, defaultRecipe(b.id))}">
         <h2>${esc(b.name)}</h2>
         <div class="content">
           <p>${esc(b.origin)} · ${esc(b.process)} · ${esc(b.roast)}</p>
@@ -105,6 +109,7 @@ function pourList(r) {
   return `
     <section>
       <h2 class="section-title">ลำดับการเท <small>${esc(r.method)} · อ่านเลขบนตาชั่ง</small></h2>
+      ${r.prep_note ? `<p class="prep">${esc(r.prep_note)}</p>` : ''}
       <ol class="pours">${rows}${end}</ol>
       <p class="hint">เทรอบถัดไปเมื่อน้ำเกือบลงหมด</p>
     </section>`;
@@ -122,16 +127,17 @@ function sortedDoseBox(b, r) {
       <tr>
         <td>${d.toFixed(1)} g</td>
         <td><b>${Math.round(r.water_g * k)} g</b></td>
+        ${r.ice_g ? `<td>${Math.round(r.ice_g * k)} g</td>` : ''}
         <td class="seq">${cums.map((c) => Math.round(c * k)).join(' · ')}</td>
       </tr>`;
   }).join('');
   return `
     <details class="box">
       <summary>คัดเมล็ดแล้วถั่วไม่ถึง ${r.dose_g} g</summary>
-      <p class="meta">ตัก ${r.dose_g} g จากถุง → คัดเมล็ด → ชั่งที่เหลือ → ใช้น้ำตามแถวนั้น ไม่ต้องเติมถั่ว</p>
+      <p class="meta">ตัก ${r.dose_g} g จากถุง → คัดเมล็ด → ชั่งที่เหลือ → ใช้น้ำ${r.ice_g ? 'และน้ำแข็ง' : ''}ตามแถวนั้น ไม่ต้องเติมถั่ว</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>ถั่วหลังคัด</th><th>น้ำรวม</th><th>ตาชั่งแต่ละเท</th></tr></thead>
+          <thead><tr><th>ถั่วหลังคัด</th><th>${r.ice_g ? 'น้ำร้อน' : 'น้ำรวม'}</th>${r.ice_g ? '<th>น้ำแข็ง</th>' : ''}<th>ตาชั่งแต่ละเท</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -168,6 +174,7 @@ function factsBox(b, w) {
 
 function recipeBody(b, r) {
   const chips = [
+    r.ice_g ? `<span class="chip">อัตราส่วนรวมน้ำแข็ง ${ratioText(r)}</span>` : '',
     r.swirl && SWIRL[r.swirl] ? `<span class="chip${r.swirl === 'forbidden' ? ' strong' : ''}">${SWIRL[r.swirl]}</span>` : '',
     b.sort ? `<span class="chip${b.sort === 'mandatory' ? ' strong' : ''}">${SORT[b.sort]}</span>` : '',
   ].join('');
@@ -177,7 +184,9 @@ function recipeBody(b, r) {
       <div class="col">
         <div class="specs">
           ${spec('ถั่ว', r.dose_g, 'g')}
-          ${spec(`น้ำ · ${ratioText(r)}`, r.water_g, 'g')}
+          ${r.ice_g
+            ? spec(`น้ำร้อน · +น้ำแข็ง ${r.ice_g} g`, r.water_g, 'g')
+            : spec(`น้ำ · ${ratioText(r)}`, r.water_g, 'g')}
           ${spec('อุณหภูมิ', r.temp_c, '°C')}
           ${spec(r.grind.grinder, r.grind.clicks, 'คลิก')}
         </div>
@@ -196,12 +205,25 @@ function renderBean(beanId, recipeId) {
   const b = bean(beanId);
   if (!b) return renderHome();
 
-  const list = recipesOf(b.id);
-  const r = (recipeId && list.find((x) => x.id === recipeId)) || list[list.length - 1] || null;
-  const tabs = list.length > 1
-    ? `<nav class="tabs" aria-label="สูตรตามน้ำ">${list.map((x) => `
-        <a class="tab" href="${beanHref(b, x)}"${r && x.id === r.id ? ' aria-current="page"' : ''}>${esc(waterName(x.water))}</a>`).join('')}
-      </nav>`
+  const list = sortedRecipes(b.id);
+  const r = (recipeId && list.find((x) => x.id === recipeId)) || list[0] || null;
+
+  // row 1: waters (keep the same serve when switching) · row 2: iced / hot on this water
+  const waterIds = [...new Set(list.map((x) => x.water))];
+  const waterTabs = waterIds.map((wid) => {
+    const target = list.find((x) => x.water === wid && r && x.serve === r.serve) || list.find((x) => x.water === wid);
+    const current = r && r.water === wid ? ' aria-current="page"' : '';
+    return `<a class="tab" href="${beanHref(b, target)}"${current}>${esc(waterName(wid))}</a>`;
+  }).join('');
+  const serveTabs = r ? list.filter((x) => x.water === r.water).map((x) => {
+    const current = x.id === r.id ? ' aria-current="page"' : '';
+    return `<a class="tab serve" href="${beanHref(b, x)}"${current}>${esc(SERVE[x.serve] || x.serve)}</a>`;
+  }).join('') : '';
+  const tabs = list.length
+    ? `<div class="tab-rows">
+        ${waterIds.length > 1 ? `<nav class="tabs" aria-label="น้ำ"><span class="tabs-label">น้ำ</span>${waterTabs}</nav>` : ''}
+        ${serveTabs ? `<nav class="tabs" aria-label="เย็นหรือร้อน"><span class="tabs-label">เสิร์ฟ</span>${serveTabs}</nav>` : ''}
+      </div>`
     : '';
 
   document.title = `${b.name} · สูตรกาแฟ`;
@@ -211,7 +233,7 @@ function renderBean(beanId, recipeId) {
       <header class="bean-head">
         <p class="eyebrow">${esc(b.roaster)} · ${esc(b.origin)}</p>
         <h1>${esc(b.name)}</h1>
-        <p class="lede">${esc(b.process)} · ${esc(b.roast)}${r ? ` · น้ำ ${esc(waterName(r.water))}` : ''}</p>
+        <p class="lede">${esc(b.process)} · ${esc(b.roast)}${r ? ` · น้ำ ${esc(waterName(r.water))} · ${esc(SERVE[r.serve] || '')}` : ''}</p>
       </header>
       <span class="banner">${b.image ? `<img src="${esc(b.image)}" alt="ถุง ${esc(b.name)}">` : ''}</span>
       ${tabs}
@@ -242,8 +264,7 @@ backdrop.addEventListener('click', () => setMenu(false));
 
 function buildMenu() {
   document.getElementById('menu-links').innerHTML = `<li><a href="#/">หน้าแรก</a></li>${DATA.beans.map((b) => {
-    const rs = latestPerWater(b.id);
-    return `<li><a href="${beanHref(b, rs[rs.length - 1])}">${esc(b.name)}</a></li>`;
+    return `<li><a href="${beanHref(b, defaultRecipe(b.id))}">${esc(b.name)}</a></li>`;
   }).join('')}`;
   document.getElementById('updated').textContent = `สูตรกาแฟส่วนตัว · อัปเดต ${DATA.updated}`;
 }
