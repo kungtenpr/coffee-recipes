@@ -26,10 +26,10 @@ const beanStyle = (b) => `style="--bean:${esc(b.color)}"`;
 const ratioText = (r) => `1:${r.ratio}`;
 const beanHref = (b, r) => `#/bean/${encodeURIComponent(b.id)}${r ? `/${encodeURIComponent(r.id)}` : ''}`;
 
-function media(b, cls = '') {
-  return b.image
-    ? `<img class="${cls}" src="${esc(b.image)}" alt="ถุง ${esc(b.name)}" loading="lazy">`
-    : `<div class="${cls} placeholder" aria-hidden="true">${esc(b.name.slice(0, 1))}</div>`;
+function waterName(id) {
+  const w = water(id);
+  if (!w) return id;
+  return w.ec_us_cm ? `${w.name} ${w.ec_us_cm}` : w.name;
 }
 
 function waterMeta(w) {
@@ -39,58 +39,42 @@ function waterMeta(w) {
   return esc(parts.join(' · '));
 }
 
-/* ---------- Home ---------- */
+const specLine = (r) => `${r.dose_g} g · ${ratioText(r)} · ${r.temp_c}° · ${r.grind.clicks} คลิก`;
 
-function waterName(id) {
-  const w = water(id);
-  if (!w) return id;
-  return w.ec_us_cm ? `${w.name} · ${w.ec_us_cm}` : w.name;
-}
+/* ---------- Home: Phantom tiles ---------- */
 
-function card(b) {
+function tile(b) {
   const recipes = latestPerWater(b.id);
-  const rows = recipes.length
-    ? recipes.map((r) => `
-        <a class="water-row" href="${beanHref(b, r)}">
-          <span class="wr-name">${esc(waterName(r.water))}</span>
-          <span class="wr-spec">${r.dose_g} g · ${ratioText(r)} · ${r.temp_c}° · ${r.grind.clicks} คลิก</span>
-        </a>`).join('')
-    : '<p class="empty">ยังไม่มีสูตร</p>';
+  const specs = recipes.map((r) => `
+    <p class="spec"><span class="water">${esc(waterName(r.water))}</span>${esc(specLine(r))}</p>`).join('');
 
   return `
-    <article class="card beaned" ${beanStyle(b)}>
-      <a class="card-media" href="${beanHref(b, recipes[recipes.length - 1])}" tabindex="-1" aria-hidden="true">${media(b)}</a>
-      <div class="card-body">
-        <p class="eyebrow">${esc(b.roaster)} · ${esc(b.origin)}</p>
-        <h2 class="bean-name"><a href="${beanHref(b, recipes[recipes.length - 1])}">${esc(b.name)}</a></h2>
-        <p class="meta">${esc(b.process)} · ${esc(b.roast)}</p>
-        <ul class="notes">${b.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
-        <div class="water-rows">${rows}</div>
-      </div>
+    <article class="tile" ${beanStyle(b)}>
+      <span class="image">${b.image ? `<img src="${esc(b.image)}" alt="" loading="lazy">` : ''}</span>
+      <a href="${beanHref(b, recipes[recipes.length - 1])}">
+        <h2>${esc(b.name)}</h2>
+        <div class="content">
+          <p>${esc(b.origin)} · ${esc(b.process)}</p>
+          ${specs || '<p>ยังไม่มีสูตร</p>'}
+        </div>
+      </a>
     </article>`;
 }
 
 function renderHome() {
   document.title = 'สูตรกาแฟ';
   app.innerHTML = `
-    <header class="top wrap">
-      <p class="eyebrow">V60 · Timemore C3S · 4:6</p>
-      <h1 class="title">สูตรกาแฟ</h1>
-      <p class="water-meta">เลือกเมล็ด แล้วเลือกสูตรตามน้ำที่ใช้</p>
+    <header class="intro">
+      <h1>สูตรกาแฟ V60</h1>
+      <p>Timemore C3S · 4:6 · เลือกเมล็ด แล้วเลือกสูตรตามน้ำที่ใช้</p>
     </header>
-    <main class="wrap grid">${DATA.beans.map(card).join('')}</main>
-    <footer class="wrap foot">อัปเดตล่าสุด ${esc(DATA.updated)}</footer>`;
+    <section class="tiles">${DATA.beans.map(tile).join('')}</section>`;
 }
 
-/* ---------- Bean / recipe ---------- */
+/* ---------- Bean page: Phantom generic ---------- */
 
-function stat(label, value, unit, sub) {
-  return `
-    <div class="stat">
-      <div class="k">${esc(label)}</div>
-      <div class="v">${esc(value)}<small>${esc(unit)}</small></div>
-      ${sub ? `<div class="s">${esc(sub)}</div>` : ''}
-    </div>`;
+function spec(label, value, unit) {
+  return `<div class="spec"><div class="v">${esc(value)}<small>${esc(unit)}</small></div><div class="k">${esc(label)}</div></div>`;
 }
 
 function pourList(r) {
@@ -101,14 +85,14 @@ function pourList(r) {
   const rows = r.pours.map((p, i) => {
     cum += p.g;
     const head = i === 0
-      ? `<li class="phase">PHASE 1 · ${phase1Pct}% <span>ปรับเปรี้ยว / หวาน</span></li>`
+      ? `<li class="phase">Phase 1 · ${phase1Pct}%<span>ปรับเปรี้ยว / หวาน</span></li>`
       : i === phase1
-        ? `<li class="phase">PHASE 2 · ${100 - phase1Pct}% <span>ปรับความเข้ม</span></li>`
+        ? `<li class="phase">Phase 2 · ${100 - phase1Pct}%<span>ปรับความเข้ม</span></li>`
         : '';
     return `${head}
       <li class="pour">
         <span class="n">${i + 1}</span>
-        <div><div class="cum">${cum}<small> g</small></div><div class="add">เท +${p.g} g</div></div>
+        <div><div class="cum">${cum}<small>g</small></div><div class="add">เท +${p.g} g</div></div>
         <div class="at">${p.at ? esc(p.at) : ''}</div>
         ${p.note ? `<p class="do">${esc(p.note)}</p>` : ''}
       </li>`;
@@ -124,15 +108,15 @@ function pourList(r) {
     : '';
 
   return `
-    <section class="panel pours">
-      <h2>ลำดับการเท <small>${esc(r.method)} · อ่านเลขบนตาชั่ง</small></h2>
-      <ol>${rows}${end}</ol>
+    <section>
+      <h2 class="section-title">ลำดับการเท <small>${esc(r.method)} · อ่านเลขบนตาชั่ง</small></h2>
+      <ol class="pours">${rows}${end}</ol>
       <p class="hint">เทรอบถัดไปเมื่อน้ำเกือบลงหมด</p>
     </section>`;
 }
 
 // fixed dose is scooped before sorting; water and pours scale to what's left
-function sortedDosePanel(b, r) {
+function sortedDoseBox(b, r) {
   if (!b.sort) return '';
   let cum = 0;
   const cums = r.pours.map((p) => (cum += p.g));
@@ -147,7 +131,7 @@ function sortedDosePanel(b, r) {
       </tr>`;
   }).join('');
   return `
-    <details class="panel">
+    <details class="box">
       <summary>คัดเมล็ดแล้วถั่วไม่ถึง ${r.dose_g} g</summary>
       <p class="meta">ตัก ${r.dose_g} g จากถุง → คัดเมล็ด → ชั่งที่เหลือ → ใช้น้ำตามแถวนั้น ไม่ต้องเติมถั่ว</p>
       <div class="table-wrap">
@@ -159,22 +143,23 @@ function sortedDosePanel(b, r) {
     </details>`;
 }
 
-function whyPanel(r) {
+function whyBox(r) {
   if (!r.why || !r.why.length) return '';
   return `
-    <details class="panel">
+    <details class="box">
       <summary>ทำไมสูตรนี้</summary>
       <ul class="why">${r.why.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
     </details>`;
 }
 
-function factsPanel(b, w) {
+function factsBox(b, w) {
   const defect = b.defect_pct ? `${b.defect_pct[0]}–${b.defect_pct[1]}%` : '–';
   return `
-    <section class="panel">
+    <section class="box">
       <h2>ข้อมูลถั่ว</h2>
       <dl class="facts">
         <dt>ชื่อเต็ม</dt><dd>${esc(b.full_name)}</dd>
+        <dt>โรงคั่ว</dt><dd>${esc(b.roaster)}</dd>
         <dt>แหล่ง</dt><dd>${esc(b.origin)}</dd>
         <dt>โพรเซส</dt><dd>${esc(b.process)}</dd>
         <dt>คั่ว</dt><dd>${esc(b.roast)}</dd>
@@ -187,38 +172,29 @@ function factsPanel(b, w) {
 }
 
 function recipeBody(b, r) {
-  const w = water(r.water);
   const chips = [
     r.swirl && SWIRL[r.swirl] ? `<span class="chip${r.swirl === 'forbidden' ? ' strong' : ''}">${SWIRL[r.swirl]}</span>` : '',
     b.sort ? `<span class="chip${b.sort === 'mandatory' ? ' strong' : ''}">${SORT[b.sort]}</span>` : '',
   ].join('');
 
   return `
-    <div class="col">
-      <div class="chips">${chips}</div>
-      <section class="stats">
-        ${stat('ถั่ว', r.dose_g, 'g', '')}
-        ${stat('น้ำ', r.water_g, 'g', ratioText(r))}
-        ${stat('อุณหภูมิ', r.temp_c, '°C', '')}
-        ${stat('บด', r.grind.clicks, 'คลิก', r.grind.grinder)}
-      </section>
-      ${pourList(r)}
-    </div>
-    <div class="col">
-      ${sortedDosePanel(b, r)}
-      ${whyPanel(r)}
-      ${factsPanel(b, w)}
+    <div class="recipe">
+      <div class="col">
+        <div class="specs">
+          ${spec('ถั่ว', r.dose_g, 'g')}
+          ${spec(`น้ำ · ${ratioText(r)}`, r.water_g, 'g')}
+          ${spec('อุณหภูมิ', r.temp_c, '°C')}
+          ${spec(r.grind.grinder, r.grind.clicks, 'คลิก')}
+        </div>
+        <div class="chips">${chips}</div>
+        ${pourList(r)}
+      </div>
+      <div class="col">
+        ${sortedDoseBox(b, r)}
+        ${whyBox(r)}
+        ${factsBox(b, water(r.water))}
+      </div>
     </div>`;
-}
-
-function noRecipe(b) {
-  return `
-    <div class="col">
-      <section class="panel">
-        <h2>ถั่วตัวนี้ยังไม่มีสูตร</h2>
-      </section>
-    </div>
-    <div class="col">${factsPanel(b, null)}</div>`;
 }
 
 function renderBean(beanId, recipeId) {
@@ -227,30 +203,54 @@ function renderBean(beanId, recipeId) {
 
   const list = recipesOf(b.id);
   const r = (recipeId && list.find((x) => x.id === recipeId)) || list[list.length - 1] || null;
-  const tabs = list.map((x) => {
-    const current = r && x.id === r.id ? ' aria-current="page"' : '';
-    return `<a class="tab" href="${beanHref(b, x)}"${current}>${esc(waterName(x.water))}</a>`;
-  }).join('');
+  const tabs = list.length > 1
+    ? `<nav class="tabs" aria-label="สูตรตามน้ำ">${list.map((x) => `
+        <a class="tab" href="${beanHref(b, x)}"${r && x.id === r.id ? ' aria-current="page"' : ''}>${esc(waterName(x.water))}</a>`).join('')}
+      </nav>`
+    : '';
 
   document.title = `${b.name} · สูตรกาแฟ`;
   app.innerHTML = `
-    <div class="beaned" ${beanStyle(b)}>
+    <div ${beanStyle(b)}>
+      <a class="back" href="#/">← สูตรทั้งหมด</a>
       <header class="bean-head">
-        <div class="wrap">
-          <a class="back" href="#/">← สูตรทั้งหมด</a>
-          <div class="bean-title">
-            ${media(b, 'thumb')}
-            <div>
-              <p class="eyebrow">${esc(b.roaster)} · ${esc(b.origin)}</p>
-              <h1 class="bean-name">${esc(b.name)}</h1>
-              <p class="meta">${esc(b.process)} · ${esc(b.roast)}</p>
-            </div>
-          </div>
-          ${list.length ? `<nav class="tabs" aria-label="สูตรตามน้ำ">${tabs}</nav>` : ''}
-        </div>
+        <p class="eyebrow">${esc(b.roaster)} · ${esc(b.origin)}</p>
+        <h1>${esc(b.name)}</h1>
+        <p class="lede">${esc(b.process)} · ${esc(b.roast)}${r ? ` · น้ำ ${esc(waterName(r.water))}` : ''}</p>
       </header>
-      <main class="wrap recipe">${r ? recipeBody(b, r) : noRecipe(b)}</main>
+      <span class="banner">${b.image ? `<img src="${esc(b.image)}" alt="ถุง ${esc(b.name)}">` : ''}</span>
+      ${tabs}
+      ${r ? recipeBody(b, r) : `<section class="box"><h2>ถั่วตัวนี้ยังไม่มีสูตร</h2></section>`}
     </div>`;
+}
+
+/* ---------- Menu ---------- */
+
+const body = document.body;
+const menu = document.getElementById('menu');
+const toggle = document.querySelector('.menu-toggle');
+
+function setMenu(open) {
+  body.classList.toggle('menu-open', open);
+  toggle.setAttribute('aria-expanded', String(open));
+  menu.inert = !open;
+  if (open) menu.querySelector('a').focus();
+}
+
+toggle.addEventListener('click', () => setMenu(true));
+menu.querySelector('.menu-close').addEventListener('click', () => { setMenu(false); toggle.focus(); });
+menu.addEventListener('click', (e) => { if (e.target.closest('#menu-links a')) setMenu(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && body.classList.contains('menu-open')) setMenu(false); });
+document.getElementById('wrapper').addEventListener('click', (e) => {
+  if (body.classList.contains('menu-open') && !e.target.closest('.menu-toggle')) setMenu(false);
+});
+
+function buildMenu() {
+  document.getElementById('menu-links').innerHTML = `<li><a href="#/">หน้าแรก</a></li>${DATA.beans.map((b) => {
+    const rs = latestPerWater(b.id);
+    return `<li><a href="${beanHref(b, rs[rs.length - 1])}">${esc(b.name)}</a></li>`;
+  }).join('')}`;
+  document.getElementById('updated').textContent = `สูตรกาแฟส่วนตัว · อัปเดต ${DATA.updated}`;
 }
 
 /* ---------- Boot ---------- */
@@ -274,7 +274,7 @@ window.addEventListener('hashchange', () => { route(); window.scrollTo(0, 0); })
 
 fetch('data/recipes.json', { cache: 'no-cache' })
   .then((res) => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
-  .then((json) => { DATA = json; checkData(); route(); })
+  .then((json) => { DATA = json; checkData(); buildMenu(); route(); })
   .catch((err) => {
-    app.innerHTML = `<p class="wrap error">โหลดสูตรไม่ได้ (${esc(err.message)})</p>`;
+    app.innerHTML = `<p class="error">โหลดสูตรไม่ได้ (${esc(err.message)})</p>`;
   });

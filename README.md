@@ -1,6 +1,7 @@
 # สูตรกาแฟ (coffee-recipes)
 
 เว็บส่วนตัวไว้เปิดดูสูตร V60 ของแต่ละเมล็ด แยกตามน้ำที่ใช้ — static site บน GitHub Pages
+หน้าตา: โครง **Phantom** ของ HTML5 UP (CC BY 3.0 · ต้องคงเครดิตท้ายเว็บ) เขียนใหม่ไม่ใช้ jQuery · สีโทนร้านกาแฟมืด (ทอง + Playfair Display)
 `https://kungtenpr.github.io/coffee-recipes/`
 
 ## โครงสร้าง
@@ -10,7 +11,7 @@ index.html          หน้าเดียว (hash routing: #/ · #/bean/<bea
 app.js              render ทั้งหมดจาก data
 styles.css
 data/recipes.json   ← แก้สูตร/เพิ่มเมล็ด/เพิ่มน้ำ ที่นี่ที่เดียว
-images/             รูปถุง (ไม่มีรูปก็ได้ จะแสดงเป็นการ์ดสี)
+images/             รูปถุง (ไม่มีรูปก็ได้ จะแสดงเป็นการ์ดสีประจำเมล็ด)
 ```
 
 ## data/recipes.json
