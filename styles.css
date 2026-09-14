@@ -93,9 +93,8 @@ body.menu-open #menu { transform: none; visibility: visible; }
   cursor: pointer;
 }
 #menu h2 {
-  margin: 0 0 1.5em;
-  font-family: var(--latin-caps); font-size: .8em; font-weight: 600;
-  letter-spacing: .35em; text-transform: uppercase;
+  margin: 0 0 1em;
+  font-size: .9em; font-weight: 600;
   opacity: .7;
 }
 #menu ul { margin: 0; padding: 0; list-style: none; }
