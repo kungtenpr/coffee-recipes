@@ -229,9 +229,11 @@ function renderBean(beanId, recipeId) {
 const body = document.body;
 const menu = document.getElementById('menu');
 const toggle = document.querySelector('.menu-toggle');
+const backdrop = document.querySelector('.menu-backdrop');
 
 function setMenu(open) {
   body.classList.toggle('menu-open', open);
+  backdrop.hidden = !open;
   toggle.setAttribute('aria-expanded', String(open));
   menu.inert = !open;
   if (open) menu.querySelector('a').focus();
@@ -241,9 +243,7 @@ toggle.addEventListener('click', () => setMenu(true));
 menu.querySelector('.menu-close').addEventListener('click', () => { setMenu(false); toggle.focus(); });
 menu.addEventListener('click', (e) => { if (e.target.closest('#menu-links a')) setMenu(false); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && body.classList.contains('menu-open')) setMenu(false); });
-document.getElementById('wrapper').addEventListener('click', (e) => {
-  if (body.classList.contains('menu-open') && !e.target.closest('.menu-toggle')) setMenu(false);
-});
+backdrop.addEventListener('click', () => setMenu(false));
 
 function buildMenu() {
   document.getElementById('menu-links').innerHTML = `<li><a href="#/">หน้าแรก</a></li>${DATA.beans.map((b) => {

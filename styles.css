@@ -87,7 +87,11 @@ img { max-width: 100%; }
   overflow-y: auto;
 }
 body.menu-open #menu { transform: none; visibility: visible; }
-body.menu-open #wrapper { opacity: .3; pointer-events: none; transition: opacity .45s ease; }
+.menu-backdrop {
+  position: fixed; inset: 0; z-index: 25;
+  background: rgba(0, 0, 0, .6);
+  cursor: pointer;
+}
 #menu h2 {
   margin: 0 0 1.5em;
   font-family: var(--latin-caps); font-size: .8em; font-weight: 600;

@@ -34,14 +34,6 @@
       </div>
     </header>
 
-    <nav id="menu" aria-label="เมนู" inert>
-      <div class="menu-inner">
-        <h2>เมนู</h2>
-        <ul id="menu-links"><li><a href="#/">หน้าแรก</a></li></ul>
-      </div>
-      <button class="menu-close" type="button" aria-label="ปิดเมนู">×</button>
-    </nav>
-
     <main id="main">
       <div class="inner" id="app"><p class="loading">กำลังโหลดสูตร…</p></div>
     </main>
@@ -53,6 +45,15 @@
       </div>
     </footer>
   </div>
+
+  <div class="menu-backdrop" hidden></div>
+  <nav id="menu" aria-label="เมนู" inert>
+    <div class="menu-inner">
+      <h2>เมนู</h2>
+      <ul id="menu-links"><li><a href="#/">หน้าแรก</a></li></ul>
+    </div>
+    <button class="menu-close" type="button" aria-label="ปิดเมนู">×</button>
+  </nav>
   <noscript><p>ต้องเปิด JavaScript เพื่อดูสูตร</p></noscript>
   <script src="app.js" defer></script>
 </body>
