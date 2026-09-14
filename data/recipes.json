@@ -7,13 +7,6 @@
       "ec_us_cm": 144,
       "temp_c": 29.7,
       "note": "ไม่เติมแร่"
-    },
-    {
-      "id": "pure-life",
-      "name": "Nestlé Pure Life",
-      "ec_us_cm": null,
-      "temp_c": null,
-      "note": "TDS ตามฉลาก 178 ppm"
     }
   ],
   "beans": [
@@ -68,108 +61,6 @@
     }
   ],
   "recipes": [
-    {
-      "id": "yellow-lots--pure-life",
-      "bean": "yellow-lots",
-      "water": "pure-life",
-      "method": "4:6",
-      "dose_g": 20,
-      "water_g": 320,
-      "ratio": 16,
-      "temp_c": 94,
-      "grind": {
-        "grinder": "Timemore C3S",
-        "clicks": 17
-      },
-      "phase1_pours": 2,
-      "pours": [
-        {
-          "g": 50,
-          "at": "0:00",
-          "note": "เทวนก้นหอยจากกลางออก ให้ผงเปียกทั่ว"
-        },
-        {
-          "g": 78,
-          "at": "0:45",
-          "note": "เทวนช้าๆ ตรงกลาง เลี่ยงผนังกระดาษ"
-        },
-        {
-          "g": 64,
-          "at": "1:30",
-          "note": "เทวนตรงกลาง"
-        },
-        {
-          "g": 64,
-          "at": "2:10",
-          "note": "เทวนตรงกลาง"
-        },
-        {
-          "g": 64,
-          "at": "2:50",
-          "note": "เทวนตรงกลาง แล้ว swirl เบาๆ 2–3 รอบ"
-        }
-      ],
-      "swirl": "allowed",
-      "time": {
-        "min": "3:40",
-        "max": "4:00"
-      },
-      "why": [
-        "Phase 1 เทแรกน้อย เทสองมาก (50/78) ดันความหวาน",
-        "Anaerobic + คั่วอ่อน เซลล์แน่น โน้ตมอลต์กับน้ำผึ้งจะออกเมื่อสกัดได้สูง"
-      ],
-      "finish_note": "รอน้ำไหลหมด ผิวกาแฟควรแบนเรียบ"
-    },
-    {
-      "id": "benizio-beer-rose--pure-life",
-      "bean": "benizio-beer-rose",
-      "water": "pure-life",
-      "method": "4:6",
-      "dose_g": 18,
-      "water_g": 300,
-      "ratio": 16.7,
-      "temp_c": 92,
-      "grind": {
-        "grinder": "Timemore C3S",
-        "clicks": 17
-      },
-      "phase1_pours": 2,
-      "pours": [
-        {
-          "g": 60,
-          "at": null,
-          "note": "เทวนก้นหอยจากกลางออก ให้ผงเปียกทั่ว"
-        },
-        {
-          "g": 60,
-          "at": null,
-          "note": "เทวนเบาๆ ตรงกลาง ไม่ให้โดนผนัง"
-        },
-        {
-          "g": 60,
-          "at": null,
-          "note": "เทวนเบาๆ ตรงกลาง"
-        },
-        {
-          "g": 60,
-          "at": null,
-          "note": "เทวนเบาๆ ตรงกลาง"
-        },
-        {
-          "g": 60,
-          "at": null,
-          "note": "เทวนเบาๆ ตรงกลาง · ห้าม swirl ห้ามเขย่า"
-        }
-      ],
-      "swirl": "forbidden",
-      "time": null,
-      "why": [
-        "Washed ล้างเมือกออกก่อนตาก สารละลายน้อย ช่วงสกัดแคบ เกินนิดเดียวจะฝาดทันที",
-        "92 °C เก็บกลิ่นดอกไม้ ซึ่งระเหยง่ายเมื่อเกิน 94 °C",
-        "Phase 1 เท่ากัน 60/60 รักษาความเปรี้ยว · ไม่ swirl ท้าย กันสกัดเกิน"
-      ],
-      "finish_note": "ปล่อยให้ไหลเอง ไม่แตะดริปเปอร์"
-    },
     {
       "id": "yellow-lots--neptune-144",
       "bean": "yellow-lots",
