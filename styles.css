@@ -176,8 +176,7 @@ body.menu-open #menu { transform: none; visibility: visible; }
   transition: max-height .5s ease, opacity .5s ease;
 }
 .tile .content p { margin: .3em 0 0; font-size: .9em; font-weight: 400; text-shadow: 0 1px 10px rgba(0, 0, 0, .45); }
-.tile .content .spec { font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
-.tile .content .water { display: block; font-size: .8em; font-weight: 400; opacity: .85; }
+.tile .content .tasting { font-weight: 600; }
 
 .tile:hover .image img { transform: scale(1.06); }
 .tile:hover .image::before { background: color-mix(in srgb, var(--bean) 40%, var(--tile-shade)); opacity: .9; }

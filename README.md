@@ -35,6 +35,8 @@ python3 -m http.server 4175
 
 ## Deploy
 
+**ทุกครั้งที่แก้ styles.css หรือ app.js ให้เปลี่ยน `?v=` ใน index.html** ไม่งั้นมือถือจะใช้ไฟล์เก่าที่แคชไว้
+
 push `main` → GitHub Pages (Deploy from a branch · main · /root) อัปเดตใน ~1 นาที
 repo ตั้ง `core.sshCommand` ใช้คีย์ `~/.ssh/velai_deploy` (บัญชี kungtenpr) และ commit ด้วยอีเมล noreply ของ kungtenpr
 

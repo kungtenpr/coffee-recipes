@@ -39,23 +39,18 @@ function waterMeta(w) {
   return esc(parts.join(' · '));
 }
 
-const specLine = (r) => `${r.dose_g} g · ${ratioText(r)} · ${r.temp_c}° · ${r.grind.clicks} คลิก`;
-
 /* ---------- Home: Phantom tiles ---------- */
 
 function tile(b) {
   const recipes = latestPerWater(b.id);
-  const specs = recipes.map((r) => `
-    <p class="spec"><span class="water">${esc(waterName(r.water))}</span>${esc(specLine(r))}</p>`).join('');
-
   return `
     <article class="tile" ${beanStyle(b)}>
       <span class="image">${b.image ? `<img src="${esc(b.image)}" alt="" loading="lazy">` : ''}</span>
       <a href="${beanHref(b, recipes[recipes.length - 1])}">
         <h2>${esc(b.name)}</h2>
         <div class="content">
-          <p>${esc(b.origin)} · ${esc(b.process)}</p>
-          ${specs || '<p>ยังไม่มีสูตร</p>'}
+          <p>${esc(b.origin)} · ${esc(b.process)} · ${esc(b.roast)}</p>
+          <p class="tasting">${b.notes.map(esc).join(' · ')}</p>
         </div>
       </a>
     </article>`;
