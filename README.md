@@ -15,16 +15,15 @@ images/             รูปถุง (ไม่มีรูปก็ได้ 
 
 ## data/recipes.json
 
-- `current_water` — น้ำที่ใช้อยู่ตอนนี้ (ค่าเริ่มต้นของตัวเลือกน้ำ)
 - `waters[]` — `id, name, ec_us_cm, temp_c, note`
-- `beans[]` — `id, name, full_name, roaster, origin, process, roast, notes[], defect_pct[min,max], sort (mandatory|recommended|null), correction (push|pull), axis, color (hex), image (path|null), label_note`
-- `recipes[]` — สูตร = เมล็ด × น้ำ · เรียงเก่า → ใหม่ (ตัวสุดท้ายของคู่ bean+water = สูตรล่าสุด)
-  - `id, bean, water, version, status (baseline|dialled|archived), date, method`
+- `beans[]` — `id, name, full_name, roaster, origin, process, roast, notes[], defect_pct[min,max], sort (mandatory|recommended|null), correction (push|pull), axis, color (hex), image (path|null)`
+- `recipes[]` — สูตร = เมล็ด × น้ำ (คู่ละ 1 สูตร)
+  - `id, bean, water, method`
   - `dose_g, water_g, ratio, temp_c, grind {grinder, clicks}`
-  - `phase1_pours` (4:6 = 2), `pours[{g, at}]` — g ต่อครั้ง ต้องรวมได้ `water_g`
-  - `swirl (allowed|forbidden)`, `time {min, max}|null`, `why[]`, `ladder[{symptom, steps[]}]`
+  - `phase1_pours` (4:6 = 2), `pours[{g, at, note}]` — g ต่อครั้ง ต้องรวมได้ `water_g` · note = ต้องทำอะไรตอนเท
+  - `swirl (allowed|forbidden)`, `time {min, max}|null`, `finish_note`, `why[]`
 
-เปลี่ยนน้ำ = เพิ่ม recipe ใหม่ ไม่ต้องแก้ของเก่า (ของเก่ายังดูได้จากแถบด้านบนหน้าสูตร)
+**บนเว็บมีแต่สูตรที่เคาะแล้ว** — ไม่มีสถานะ/เวอร์ชัน/คำว่าประมาณ/ทดลอง ปรับสูตร = คุยจูนให้จบก่อน แล้วแก้ทับของเดิม · น้ำใหม่ = เพิ่ม water + recipe
 เปิด console จะเตือนถ้า pours รวมไม่เท่า water_g หรือ id อ้างผิด
 
 ## รันในเครื่อง

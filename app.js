@@ -7,17 +7,15 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
 ));
 
-const STATUS = { baseline: 'จุดตั้งต้น · ยังไม่ได้จูน', dialled: 'จูนแล้ว' };
-const SWIRL = { allowed: 'swirl ท้ายได้ (เบาๆ)', forbidden: 'ห้าม swirl ท้าย' };
+const SWIRL = { allowed: 'swirl ท้ายเบาๆ', forbidden: 'ห้าม swirl ท้าย' };
 const SORT = { mandatory: 'ต้องคัดเมล็ด', recommended: 'ควรคัดเมล็ด' };
-const DIRECTION = { push: 'ถั่วตัวนี้รสผิด → ดันการสกัดเพิ่ม', pull: 'ถั่วตัวนี้รสผิด → ถอยการสกัดลง' };
 
 const byId = (list, id) => list.find((x) => x.id === id);
 const water = (id) => byId(DATA.waters, id);
 const bean = (id) => byId(DATA.beans, id);
 const recipesOf = (beanId) => DATA.recipes.filter((r) => r.bean === beanId);
 
-// recipes are listed oldest → newest, so the last match per water is its latest version
+// one recipe per bean × water; if duplicated by mistake the later entry wins
 function latestPerWater(beanId) {
   const byWater = new Map();
   for (const r of recipesOf(beanId)) byWater.set(r.water, r);
@@ -111,7 +109,7 @@ function pourList(r) {
       <li class="pour">
         <span class="n">${i + 1}</span>
         <div><div class="cum">${cum}<small> g</small></div><div class="add">เท +${p.g} g</div></div>
-        <div class="at">${p.at ? `~${esc(p.at)}` : ''}</div>
+        <div class="at">${p.at ? esc(p.at) : ''}</div>
         ${p.note ? `<p class="do">${esc(p.note)}</p>` : ''}
       </li>`;
   }).join('');
@@ -129,22 +127,8 @@ function pourList(r) {
     <section class="panel pours">
       <h2>ลำดับการเท <small>${esc(r.method)} · อ่านเลขบนตาชั่ง</small></h2>
       <ol>${rows}${end}</ol>
-      <p class="hint">เทรอบถัดไปเมื่อน้ำเกือบลงหมด เวลาข้างขวาเป็นแค่ค่าประมาณ ตัวที่ต้องคุมคือเวลารวม</p>
+      <p class="hint">เทรอบถัดไปเมื่อน้ำเกือบลงหมด</p>
     </section>`;
-}
-
-function ladderPanel(b, r) {
-  if (!r.ladder || !r.ladder.length) return '';
-  const items = r.ladder.map((l) => `
-    <h3>${esc(l.symptom)}</h3>
-    <ol>${l.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>`).join('');
-  return `
-    <details class="panel ladder">
-      <summary>ถ้ารสไม่ใช่ ปรับยังไง</summary>
-      <p class="dir">${esc(DIRECTION[b.correction] || '')}</p>
-      <p class="meta">เปลี่ยนแก้วละหนึ่งอย่าง ลองขั้นแรกก่อน ยังไม่หายค่อยไปขั้นถัดไป</p>
-      ${items}
-    </details>`;
 }
 
 // fixed dose is scooped before sorting; water and pours scale to what's left
@@ -199,17 +183,14 @@ function factsPanel(b, w) {
         <dt>Notes</dt><dd><ul class="notes">${b.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></dd>
         ${w ? `<dt>น้ำ</dt><dd>${esc(w.name)}<br><span class="meta">${waterMeta(w)}</span></dd>` : ''}
       </dl>
-      ${b.label_note ? `<p class="warn-note">${esc(b.label_note)}</p>` : ''}
     </section>`;
 }
 
 function recipeBody(b, r) {
   const w = water(r.water);
   const chips = [
-    `<span class="chip strong">${esc(STATUS[r.status] || r.status)}${r.version ? ` · ${esc(r.version)}` : ''}</span>`,
     r.swirl && SWIRL[r.swirl] ? `<span class="chip${r.swirl === 'forbidden' ? ' strong' : ''}">${SWIRL[r.swirl]}</span>` : '',
     b.sort ? `<span class="chip${b.sort === 'mandatory' ? ' strong' : ''}">${SORT[b.sort]}</span>` : '',
-    r.date ? `<span class="chip">${esc(r.date)}</span>` : '',
   ].join('');
 
   return `
@@ -224,7 +205,6 @@ function recipeBody(b, r) {
       ${pourList(r)}
     </div>
     <div class="col">
-      ${ladderPanel(b, r)}
       ${sortedDosePanel(b, r)}
       ${whyPanel(r)}
       ${factsPanel(b, w)}
@@ -249,7 +229,7 @@ function renderBean(beanId, recipeId) {
   const r = (recipeId && list.find((x) => x.id === recipeId)) || list[list.length - 1] || null;
   const tabs = list.map((x) => {
     const current = r && x.id === r.id ? ' aria-current="page"' : '';
-    return `<a class="tab" href="${beanHref(b, x)}"${current}>${esc(waterName(x.water))} · ${esc(x.version)}</a>`;
+    return `<a class="tab" href="${beanHref(b, x)}"${current}>${esc(waterName(x.water))}</a>`;
   }).join('');
 
   document.title = `${b.name} · สูตรกาแฟ`;
