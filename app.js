@@ -11,6 +11,7 @@ const SWIRL = { allowed: 'swirl ดริปเปอร์ท้ายเบา
 const SERVE = { iced: 'เย็น', hot: 'ร้อน' };
 const SERVE_ORDER = ['iced', 'hot'];
 const TUNE_HREF = '#/tune';
+const WATER_HREF = '#/water';
 const LAST_KEY = 'coffee-recipes:last';
 
 const set = (id) => DATA.sets.find((s) => s.id === id);
@@ -94,7 +95,7 @@ function gearBox(s) {
       <dl class="facts">
         <dt>ดริปเปอร์</dt><dd>${esc(s.dripper)}</dd>
         <dt>เครื่องบด</dt><dd>${esc(s.grinder)}</dd>
-        <dt>น้ำชง</dt><dd>${esc(s.water)}${s.water_alt ? `<br><span class="meta">${esc(s.water_alt)}</span>` : ''}</dd>
+        <dt>น้ำชง</dt><dd>${esc(s.water)}${s.water_alt ? `<br><span class="meta">${esc(s.water_alt)}</span>` : ''}${DATA.water && DATA.water.set === s.id ? `<br><a class="inline-link" href="${WATER_HREF}">สูตรน้ำและจูนน้ำ →</a>` : ''}</dd>
         <dt>น้ำแข็ง</dt><dd>${esc(s.ice)}</dd>
       </dl>
     </section>`;
@@ -169,7 +170,7 @@ function renderRecipe(setId, serve) {
 
 /* ---------- Tuning guide: "want X → adjust Y" ---------- */
 
-const KNOB = { grind: '⚙️', temp: '🌡️', water: '💧', pour: '🫗' };
+const KNOB = { grind: '⚙️', temp: '🌡️', water: '💧', pour: '🫗', aura: '🫧', a: '🧪' };
 
 const tuneText = (s) => esc(String(s ?? '').replaceAll('{grind}', '1 ขั้น'));
 
@@ -182,6 +183,7 @@ function tuneCard(t) {
         ${t.where ? `<dt>เทตรงไหน</dt><dd>${esc(t.where)}</dd>` : ''}
         ${t.trade ? `<dt>แลกกับ</dt><dd>${esc(t.trade)}</dd>` : ''}
         ${t.next ? `<dt>ยังไม่ได้</dt><dd>${tuneText(t.next)}</dd>` : ''}
+        ${t.limit ? `<dt>เพดาน</dt><dd>${esc(t.limit)}</dd>` : ''}
       </dl>
     </article>`;
 }
@@ -195,6 +197,7 @@ function renderTune() {
     <header class="intro">
       <h1>ปรับรสเอง</h1>
       <p>อยากได้แบบไหน → ปรับตรงไหน · ${esc(t.grind_note)}</p>
+      ${DATA.water ? `<p class="tune-link"><a href="${WATER_HREF}">จูนน้ำ อยู่อีกหน้า →</a></p>` : ''}
     </header>
     <section class="box tune-rules">
       <h2>ก่อนเริ่ม</h2>
@@ -223,6 +226,65 @@ function renderTune() {
     </section>`;
 }
 
+/* ---------- Water: brew-water recipe + tuning ---------- */
+
+function renderWater() {
+  const w = DATA.water;
+  if (!w) return renderRecipe();
+  const s = set(w.set);
+  document.title = 'สูตรน้ำ · สูตรกาแฟ';
+  const rows = w.recipe.rows.map((r) => `
+    <tr>
+      <td>${r.knob ? `<span class="knob" aria-hidden="true">${KNOB[r.knob]}</span>` : ''}${esc(r.what)}</td>
+      <td class="amount">${r.g ? `<b>${r.g}</b> g` : esc(r.fill)}</td>
+    </tr>`).join('');
+
+  app.innerHTML = `
+    <a class="back" href="#/">← สูตร</a>
+    <header class="intro">
+      <h1>สูตรน้ำ</h1>
+      <p>${esc(w.intro)}${s ? ` · ${esc(s.dripper)} · ${esc(s.grinder)}` : ''}</p>
+      <p class="tune-link"><a href="${TUNE_HREF}">จูนเบอร์บดและอุณหภูมิ อยู่อีกหน้า →</a></p>
+    </header>
+    <div class="recipe">
+      <div class="col">
+        <section class="box">
+          <h2>1 · ${esc(w.concentrate.title)}</h2>
+          <ol class="why steps">${w.concentrate.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
+          <p class="meta">${esc(w.concentrate.note)}</p>
+        </section>
+        <section class="box">
+          <h2>2 · ${esc(w.recipe.title)}</h2>
+          <div class="table-wrap">
+            <table class="water-mix"><tbody>${rows}</tbody></table>
+          </div>
+          <p class="meta">${esc(w.recipe.note)}</p>
+        </section>
+        <p class="prep">${esc(w.ice)}</p>
+      </div>
+      <div class="col">
+        <section class="box tune-rules">
+          <h2>ก่อนจูนน้ำ</h2>
+          <ul class="why">${w.rules.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
+        </section>
+      </div>
+    </div>
+    <section class="tune-group">
+      <h2 class="section-title">จูนน้ำ</h2>
+      <div class="tunes">${w.items.map(tuneCard).join('')}</div>
+    </section>
+    <section class="tune-group">
+      <h2 class="section-title">สูตรทางเลือก</h2>
+      <div class="tunes">${w.alternatives.map((a) => `
+        <article class="tune">
+          <h3>${esc(a.name)}</h3>
+          <p class="move">${esc(a.mix)}</p>
+          <dl><dt>เหมาะกับ</dt><dd>${esc(a.when)}</dd></dl>
+        </article>`).join('')}
+      </div>
+    </section>`;
+}
+
 /* ---------- Menu ---------- */
 
 const body = document.body;
@@ -248,7 +310,7 @@ function buildMenu() {
   const links = DATA.sets.flatMap((s) => recipesOf(s.id).map((r) => (
     `<li><a href="${recipeHref(r)}">${esc(s.name)} · ${esc(SERVE[r.serve] || r.serve)}</a></li>`
   )));
-  document.getElementById('menu-links').innerHTML = `${links.join('')}<li><a href="${TUNE_HREF}">ปรับรสเอง</a></li>`;
+  document.getElementById('menu-links').innerHTML = `${links.join('')}<li><a href="${TUNE_HREF}">ปรับรสเอง</a></li>${DATA.water ? `<li><a href="${WATER_HREF}">สูตรน้ำ</a></li>` : ''}`;
   document.getElementById('updated').textContent = `สูตรกาแฟส่วนตัว · อัปเดต ${DATA.updated}`;
 }
 
@@ -265,6 +327,7 @@ function checkData() {
 function route() {
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   if (parts[0] === 'tune') renderTune();
+  else if (parts[0] === 'water') renderWater();
   else if (parts[0] === 'set') renderRecipe(parts[1], parts[2]);
   else renderRecipe();
 }

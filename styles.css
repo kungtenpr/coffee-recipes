@@ -355,3 +355,10 @@ td.seq { color: var(--muted); }
 .tune-sum li b { font-weight: 600; }
 .tune-sum li span:last-child { display: block; padding-left: 1.9em; font-size: .88em; color: var(--muted); }
 .tune-do { margin: 0; font-weight: 400; }
+
+/* ---------- Water ---------- */
+.inline-link { color: var(--accent); font-weight: 600; text-decoration: none; }
+.steps { padding-left: 1.4em; }
+.water-mix td { padding: .7em .4em; font-size: 1.05em; font-weight: 400; white-space: normal; }
+.water-mix td.amount { text-align: right; white-space: nowrap; color: var(--muted); }
+.water-mix td.amount b { font-family: var(--num); font-size: 1.5em; font-weight: 700; color: var(--accent); }
