@@ -332,3 +332,26 @@ td.seq { color: var(--muted); }
 #footer { padding-block: 3em 2.5em; background: var(--bg-alt); color: var(--muted); font-size: .88em; }
 #footer p { margin: 0 0 .3em; }
 #footer a { color: var(--ink); }
+
+/* ---------- Tuning guide ---------- */
+.intro .tune-link { margin: -2em 0 3em; }
+.tune-link a, .tune-cta b { color: var(--accent); font-weight: 600; }
+.tune-link a { text-decoration: none; }
+.tune-cta { display: block; text-decoration: none; color: var(--muted); }
+.tune-rules { margin-bottom: 2.5em; }
+.tune-group { margin-bottom: 2.5em; }
+.tunes { display: grid; gap: 1em; margin-top: 1em; }
+@media (min-width: 737px) { .tunes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tune { padding: 1em 1.2em; border: var(--box-border); border-radius: 4px; background: var(--surface); }
+.tune h3 { margin: 0 0 .3em; font-family: var(--heading); font-size: 1.15em; font-weight: 700; }
+.tune .move { margin: 0 0 .5em; padding-left: .8em; border-left: 2px solid var(--accent); font-size: 1.02em; font-weight: 400; }
+.tune .move b { margin-left: .3em; color: var(--accent); font-weight: 600; white-space: nowrap; }
+.knob { margin-right: .4em; }
+.tune dl { display: grid; grid-template-columns: auto 1fr; gap: .15em 1em; margin: 0; font-size: .9em; }
+.tune dt { color: var(--muted); }
+.tune dd { margin: 0; font-weight: 400; }
+.tune-sum { display: grid; gap: .6em; margin: 1em 0 0; padding: 0; list-style: none; }
+.tune-sum li { padding: .6em 0; border-top: 1px solid var(--line); font-weight: 400; }
+.tune-sum li b { font-weight: 600; }
+.tune-sum li span:last-child { display: block; padding-left: 1.9em; font-size: .88em; color: var(--muted); }
+.tune-do { margin: 0; font-weight: 400; }

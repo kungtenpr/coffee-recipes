@@ -66,6 +66,7 @@ function renderHome() {
     <header class="intro">
       <h1>สูตรกาแฟ V60</h1>
       <p>Timemore C3S · 4:6 · เลือกเมล็ด แล้วเลือกสูตรตามน้ำที่ใช้</p>
+      ${DATA.tuning ? `<p class="tune-link"><a href="${TUNE_HREF}">ปรับรสเอง →</a></p>` : ''}
     </header>
     <section class="tiles">${DATA.beans.map(tile).join('')}</section>`;
 }
@@ -197,6 +198,7 @@ function recipeBody(b, r) {
         ${sortedDoseBox(b, r)}
         ${whyBox(r)}
         ${factsBox(b, water(r.water))}
+        ${DATA.tuning ? `<a class="box tune-cta" href="${TUNE_HREF}">รสยังไม่ตรงใจ? <b>ปรับรสเอง →</b></a>` : ''}
       </div>
     </div>`;
 }
@@ -241,6 +243,60 @@ function renderBean(beanId, recipeId) {
     </div>`;
 }
 
+/* ---------- Tuning guide: "want X → adjust Y" ---------- */
+
+const KNOB = { grind: '⚙️', temp: '🌡️', water: '💧' };
+const TUNE_HREF = '#/tune';
+
+function tuneText(s) {
+  const g = DATA.tuning.grind_step;
+  return esc(String(s ?? '').replaceAll('{grind}', `${g.clicks} คลิก`));
+}
+
+function tuneCard(t) {
+  return `
+    <article class="tune">
+      <h3>${esc(t.goal)}</h3>
+      <p class="move"><span class="knob" aria-hidden="true">${KNOB[t.knob] || ''}</span>${esc(t.move)} <b>${tuneText(t.step)}</b></p>
+      <dl>
+        ${t.trade ? `<dt>แลกกับ</dt><dd>${esc(t.trade)}</dd>` : ''}
+        ${t.next ? `<dt>ยังไม่ได้</dt><dd>${tuneText(t.next)}</dd>` : ''}
+      </dl>
+    </article>`;
+}
+
+function renderTune() {
+  const t = DATA.tuning;
+  if (!t) return renderHome();
+  document.title = 'ปรับรสเอง · สูตรกาแฟ';
+  app.innerHTML = `
+    <a class="back" href="#/">← สูตรทั้งหมด</a>
+    <header class="intro">
+      <h1>ปรับรสเอง</h1>
+      <p>อยากได้แบบไหน → ปรับตรงไหน · เบอร์บดนับตาม ${esc(t.grind_step.grinder)}</p>
+    </header>
+    <section class="box tune-rules">
+      <h2>ก่อนเริ่ม</h2>
+      <ul class="why">${t.rules.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
+    </section>
+    ${t.groups.map((g) => `
+      <section class="tune-group">
+        <h2 class="section-title">${esc(g.title)}</h2>
+        <div class="tunes">${g.items.map(tuneCard).join('')}</div>
+      </section>`).join('')}
+    <section class="tune-group">
+      <h2 class="section-title">จำง่ายๆ</h2>
+      <ul class="tune-sum">${t.summary.map((s) => `
+        <li><span class="knob" aria-hidden="true">${KNOB[s.knob] || ''}</span><b>${esc(s.move)}</b> = ${esc(s.gain)}<span>ระวัง${esc(s.risk)}</span></li>`).join('')}
+      </ul>
+    </section>
+    <section class="box">
+      <h2>อยากได้สองอย่างที่ขัดกัน</h2>
+      <p class="meta">${esc(t.conflict.want)}</p>
+      <p class="tune-do">${tuneText(t.conflict.do)}</p>
+    </section>`;
+}
+
 /* ---------- Menu ---------- */
 
 const body = document.body;
@@ -265,7 +321,7 @@ backdrop.addEventListener('click', () => setMenu(false));
 function buildMenu() {
   document.getElementById('menu-links').innerHTML = `<li><a href="#/">หน้าแรก</a></li>${DATA.beans.map((b) => {
     return `<li><a href="${beanHref(b, defaultRecipe(b.id))}">${esc(b.name)}</a></li>`;
-  }).join('')}`;
+  }).join('')}${DATA.tuning ? `<li><a href="${TUNE_HREF}">ปรับรสเอง</a></li>` : ''}`;
   document.getElementById('updated').textContent = `สูตรกาแฟส่วนตัว · อัปเดต ${DATA.updated}`;
 }
 
@@ -283,6 +339,7 @@ function checkData() {
 function route() {
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   if (parts[0] === 'bean') renderBean(parts[1], parts[2]);
+  else if (parts[0] === 'tune') renderTune();
   else renderHome();
 }
 
