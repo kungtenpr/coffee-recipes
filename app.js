@@ -47,9 +47,9 @@ function pourList(r) {
     cum += p.g;
     const head = !phase1 ? ''
       : i === 0
-        ? `<li class="phase">Phase 1 · ${phase1G} g<span>ปรับเปรี้ยว / หวาน</span></li>`
+        ? `<li class="phase">Phase 1<span>${phase1G} g · ปรับเปรี้ยว / หวาน</span></li>`
         : i === phase1
-          ? `<li class="phase">Phase 2 · ${r.water_g - phase1G} g<span>ปรับความเข้ม</span></li>`
+          ? `<li class="phase">Phase 2<span>${r.water_g - phase1G} g · ปรับความเข้ม</span></li>`
           : '';
     return `${head}
       <li class="pour">
